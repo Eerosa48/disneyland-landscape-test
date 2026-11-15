@@ -15,7 +15,7 @@
   var MIN_ZOOM = 17.00;
   var markers = L.layerGroup();
   // Persistent preference: bubbles are enabled by default.
-  var WAIT_BUBBLES_KEY = 'greyson-wait-bubbles-enabled-v1';
+  var WAIT_BUBBLES_KEY = 'greyson-landscape-test-wait-bubbles-v1';
   var bubblesEnabled = true;
   
   try {

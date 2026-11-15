@@ -23,7 +23,7 @@
   var walkingFetch = null;
   var walkingLoadError = false;
   // Persist only local UI state; no GPS positions or server sync.
-  var SESSION_KEY = 'greyson-disney-map-session-v1';
+  var SESSION_KEY = 'greyson-disney-landscape-test-session-v1';
   var sessionReady = false;
   var sessionDate = '';
   var validDates = ['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19'];

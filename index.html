@@ -343,10 +343,22 @@
 <script src="wait-times.js"></script>
 <script src="gps-ui.js"></script>
 <script src="itinerary-ui.js"></script>
-<script src="offline-ui.js"></script>
-<script src="disney-version-ui.js"></script>
 <script src="toolbar-ui.js"></script>
-<script src="disney-activity-tracker.js"></script>
-<script src="disney-admin-overlay.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration(location.href)
+      .then(registration => {
+        const testScope = new URL(
+          '/disneyland-landscape-test/',
+          location.origin
+        ).href;
+
+        if (registration?.scope === testScope) {
+          return registration.unregister();
+        }
+      })
+      .catch(() => {});
+  }
+</script>
 </body>
 </html>
