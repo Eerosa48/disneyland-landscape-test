@@ -62,7 +62,7 @@
 
   /* The larger toolbar begins below the updater, with bigger tap targets. */
   #greyson-toolbar {
-    top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+    top: calc(54px + env(safe-area-inset-top, 0px)) !important;
     width: 68px !important;
     padding: 5px !important;
     gap: 4px !important;
