@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#b8cbb0">
+  <title>Activity Monitor | Dashboard</title>
+  <style>
+    :root{color-scheme:light;--bg:#f4f6f1;--card:#fff;--ink:#263529;--muted:#6b776c;--line:#e1e7dd;--accent:#41694f;--pale:#e8f2e9;--red:#ad4848;--cream:#fff7e7;--shadow:0 10px 34px rgba(30,51,34,.06)}
+    *{box-sizing:border-box}html{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}body{margin:0;min-height:100vh}button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.58;cursor:default}
+    .shell{max-width:1220px;margin:0 auto;padding:24px clamp(16px,3vw,36px) 52px}
+    .hidden{display:none!important}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:26px}.brand{display:flex;align-items:center;gap:12px}.brand-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:#dcebdc;font-size:24px}.eyebrow{color:var(--accent);letter-spacing:.12em;text-transform:uppercase;font-size:11px;font-weight:750}.top h1{font-size:clamp(23px,3vw,32px);margin:3px 0 0;letter-spacing:-.035em}.sub{margin:5px 0 0;color:var(--muted);font-size:13px}.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:10px 15px;font-weight:650;font-size:13px}.btn:hover{background:#f6f9f5}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.primary:hover{background:#355a41}.btn:focus-visible,input:focus-visible{outline:3px solid #a2cbaa;outline-offset:2px}
+    .login-wrap{min-height:75vh;display:grid;place-items:center}.login-panel{width:min(100%,415px);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px;box-shadow:var(--shadow)}.login-panel .brand-icon{margin:0 auto 18px}.login-panel h1{text-align:center;font-size:24px;margin:0 0 8px}.login-panel p{text-align:center;color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 25px}.field{display:block;margin:0 0 15px;font-size:13px;font-weight:650}.field input{display:block;width:100%;margin-top:7px;border:1px solid #cad6cc;border-radius:10px;padding:12px;color:var(--ink);background:#fff;font-size:15px}.login-panel .btn{width:100%;margin-top:6px;padding:13px}.error{color:#9a3434;margin:15px 0 0;font-size:13px;line-height:1.5}.hint{font-size:12px!important;margin:17px 0 0!important}
+    .notice{border:1px solid #cbd9cb;border-radius:12px;padding:12px 15px;color:var(--muted);background:#f9fcf7;font-size:13px;margin-bottom:20px;line-height:1.55}.notice strong{color:var(--ink)}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:23px}.stat{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:21px;box-shadow:var(--shadow)}.stat .num{font-size:clamp(27px,3.4vw,37px);letter-spacing:-.045em;font-weight:750;margin-bottom:8px;font-variant-numeric:tabular-nums}.stat .name{font-size:13px;font-weight:700}.stat .desc{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}.panel-head{padding:19px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}.panel h2{font-size:17px;margin:0;letter-spacing:-.02em}.panel .meta{font-size:12px;color:var(--muted);margin-top:4px}.search{padding:9px 11px;width:min(100%,250px);border-radius:9px;border:1px solid var(--line);background:#fbfcfa;font-size:13px}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:620px;font-size:13px}th{color:var(--muted);text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fbfcfa}td,th{padding:13px 19px;border-bottom:1px solid #edf0eb;vertical-align:middle}tr:last-child td{border-bottom:0}td strong{font-weight:650}.small{font-size:12px;color:var(--muted);margin-top:4px}.pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:20px;padding:5px 8px;font-weight:650;font-size:11px;white-space:nowrap;background:#f7f8f7}.pill.green{background:var(--pale);border-color:#c9e3cf;color:#2e6b40}.pill.gold{background:var(--cream);border-color:#f1ddb6;color:#826425}.empty{padding:25px 20px;color:var(--muted);font-size:13px}.foot{color:var(--muted);font-size:12px;line-height:1.7;margin-top:8px}.status{font-size:12px;color:var(--muted)}.status.error{color:var(--red)}.extra{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}.last-sync{font-size:12px;color:var(--muted);margin:0 0 16px}
+    @media(max-width:850px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}}@media(max-width:530px){.stats{gap:10px}.stat{padding:16px}.stat .num{font-size:28px}.shell{padding:15px 12px 36px}.panel-head{padding:16px}.top h1{font-size:23px}.login-panel{padding:25px 22px}.top-actions{width:100%}.top-actions .btn{flex:1}}
+
+    /* Disney app glass styling and mobile view */
+    :root {--bg:#eaf1e5;--card:rgba(252,255,248,.93);--line:#c6d6c0;--ink:#244738;--muted:#587061;--accent:#315e49;--pale:#e2efde;--shadow:0 10px 28px rgba(32,65,42,.10)}
+    html {background:linear-gradient(145deg,#dbe7d7 0%,#eef4e9 45%,#e5ede0 100%)}
+    .stat,.panel,.login-panel,.notice {background:var(--card);border-color:rgba(167,195,165,.8);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+    .btn {border-color:#b7cbb3;background:rgba(250,255,245,.86);color:#244738}
+    .btn.primary {background:#315e49;color:white}
+    .brand-icon {background:linear-gradient(135deg,#dcead0,#bad5b4);border:1px solid #c7d9bb}
+    .shell {padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+    .login-wrap {padding:calc(22px + env(safe-area-inset-top,0px)) 14px calc(20px + env(safe-area-inset-bottom,0px))}
+    .map-return {display:block;margin-top:13px;text-align:center;color:var(--accent);font-size:13px;font-weight:700;text-decoration:none}
+    .map-return:focus-visible {outline:2px solid var(--accent);outline-offset:3px}
+    @media(max-width:650px) {
+      .shell {padding-inline:12px}
+      .top {gap:12px;margin-bottom:16px}
+      .top-actions {gap:8px}
+      .top-actions .btn {min-height:42px}
+      .stat {padding:15px 13px;border-radius:18px}
+      .stat .num {font-size:30px}
+      .stat .desc {font-size:11px}
+      .panel {border-radius:19px;margin-bottom:14px}
+      .search {width:100%;min-height:40px}
+      .panel-head {align-items:stretch}
+      .table-scroll {overflow:visible}
+      table {min-width:0;width:100%;border-collapse:separate}
+      table thead {display:none}
+      tbody {display:grid;gap:10px;padding:10px}
+      tbody tr {display:block;border:1px solid #d1dfcd;border-radius:13px;overflow:hidden;background:rgba(255,255,255,.6)}
+      tbody td {display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 11px;border-bottom:1px solid #e4ecdf;text-align:right;min-height:38px;overflow-wrap:anywhere}
+      tbody td:last-child {border-bottom:0}
+      tbody td::before {content:attr(data-label);display:block;flex:0 0 41%;text-align:left;color:#5a7360;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:750}
+      tbody td .small {font-size:11px}
+      .two {gap:0}
+      .notice,.foot {font-size:12px}
+    }
+
+    /* Current iPhone viewport protection. */
+    html, body { width:100%; max-width:100%; overflow-x:clip; }
+    @media (max-width:650px) {
+      .shell,.top,.brand,.stats,.panel { min-width:0; max-width:100%; }
+      .top-actions {flex-wrap:wrap;}
+      .top-actions .status {flex:1 1 100%;}
+    }
+    .summary-period-controls {display:inline-flex;gap:4px;padding:4px;margin:0 0 16px;max-width:100%;border:1px solid #b7cbb3;border-radius:15px;background:rgba(250,255,245,.85)}
+    .summary-period-controls .btn {border:0;border-radius:11px;padding:9px 15px;white-space:nowrap;background:transparent}
+    .summary-period-controls .btn[aria-pressed="true"],
+    .summary-period-controls .btn[aria-pressed="true"]:hover {background:#315e49;color:#fff}
+    @media(pointer:coarse) {input,select,textarea{font-size:16px!important}}
+
+    /* Compact, selectable visitor list */
+    .visitors-panel {overflow:hidden;}
+    .visitor-search-wrap {position:relative;flex:0 1 300px;min-width:0;width:100%;}
+    .visitor-search-wrap .search {width:100%;max-width:none;min-height:43px;padding-right:43px;font-size:16px;}
+    .visitor-search-wrap .search::-webkit-search-cancel-button {display:none;}
+    .visitor-clear {position:absolute;right:5px;top:50%;transform:translateY(-50%);width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#42634f;font-size:24px;line-height:1;cursor:pointer}
+    .visitor-clear:hover {background:#e6efe3}
+    .visitor-clear:focus-visible {outline:2px solid #315e49;outline-offset:1px}
+    .visitor-list {display:grid;gap:10px;padding:13px;}
+    .visitor-card {display:flex;flex-direction:column;gap:7px;min-width:0;width:100%;padding:14px 16px;text-align:left;background:rgba(255,255,255,.66);border:1px solid #d1dfcd;border-radius:14px;color:var(--ink);transition:background .15s,border-color .15s}
+    .visitor-card:hover {background:#f1f8f0;border-color:#9ab99d}
+    .visitor-card:focus-visible,.preview-card:focus-visible,.back-button:focus-visible {outline:3px solid #8ebca1;outline-offset:2px}
+    .visitor-card-name-row,.visitor-card-status-row,.visitor-card-access-row,.visitor-card-feature-row{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0;width:100%}
+    .visitor-card-name {flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px;font-weight:760;line-height:1.35}
+    .visitor-card-arrow {flex:none;color:#60806a;font-size:20px;line-height:1}
+    .visitor-card-status-row {font-size:12px;color:var(--muted)}
+    .visitor-card-last {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .visitor-card-status-row .pill {flex:none;padding:3px 7px;font-size:10px}
+    .visitor-card-access-row,.visitor-card-feature-row {font-size:12px;color:#526d5c;justify-content:flex-start;line-height:1.3}
+    .visitor-card-access-row span,.visitor-card-feature-row span {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+    .visitor-card-feature-row {border-top:1px solid #e7eee3;padding-top:7px}
+    .visitor-card-feature-row strong{font-weight:700;color:#355c48;flex:none}
+
+    /* Profile and history views: same page, no navigation away from dashboard. */
+    .view-topbar {display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 14px}
+    .view-eyebrow {color:var(--muted);font-size:11px;font-weight:750;letter-spacing:.11em;text-transform:uppercase}
+    .back-button {display:inline-flex;gap:6px;align-items:center;justify-content:center;padding:8px 12px;border:1px solid #b7cbb3;border-radius:10px;background:rgba(250,255,245,.93);color:#285342;font-weight:700;font-size:13px;white-space:nowrap}
+    .profile-header {padding:20px 20px 13px}
+    .profile-header h2 {font-size:clamp(22px,5vw,29px);margin:0 0 5px;overflow-wrap:anywhere}
+    .profile-header p {margin:0;color:var(--muted);font-size:12px}
+    .profile-facts {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin:0;padding:0 10px 10px}
+    .profile-facts div {min-width:0;padding:14px 11px;border-top:1px solid #e1eadd}
+    .profile-facts dt {font-size:11px;color:var(--muted);font-weight:750;text-transform:uppercase;letter-spacing:.05em;margin:0 0 6px}
+    .profile-facts dd {font-size:13px;font-weight:680;margin:0;overflow-wrap:anywhere}
+    .profile-facts .active-text {color:#2e6b40}
+    .previews {display:grid;gap:12px;margin-bottom:14px}
+    .preview-card {display:block;text-align:left;width:100%;padding:17px 18px;background:var(--card);border:1px solid #b7ccb3;border-radius:16px;color:var(--ink);box-shadow:var(--shadow)}
+    .preview-card:hover {background:#f2f8ef}
+    .preview-title-row {display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:5px;font-size:18px;font-weight:750}
+    .preview-title-row .arrow {color:#668372;font-size:23px}
+    .preview-subtitle {display:block;font-size:12px;font-weight:750;color:#526d5c;margin-bottom:9px}
+    .preview-data {display:block;font-size:13px;font-weight:500;line-height:1.55;color:#2c4c3a;overflow-wrap:anywhere}
+    .history-note {font-size:12px;line-height:1.6;color:var(--muted);margin:13px 3px 16px}
+    .records-head {margin-bottom:13px}
+    .records-head h2 {font-size:24px;margin:0 0 5px}
+    .records-head p {font-size:12px;color:var(--muted);margin:0}
+    .records-list {display:grid;gap:10px}
+    .record-card {min-width:0;background:var(--card);border:1px solid #c6d8c1;border-radius:15px;padding:15px 17px;box-shadow:var(--shadow)}
+    .record-card-head {display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:12px}
+    .record-card-head strong {font-size:14px;line-height:1.4;min-width:0;overflow-wrap:anywhere}
+    .record-card-head .pill {flex:none}
+    .record-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 10px}
+    .record-field {min-width:0}
+    .record-field .label {display:block;font-size:10px;letter-spacing:.045em;text-transform:uppercase;font-weight:730;color:var(--muted);margin-bottom:3px}
+    .record-field .value {display:block;font-size:12px;font-weight:630;color:#2b4b3b;overflow-wrap:anywhere}
+    .record-empty {background:var(--card);border:1px solid var(--line);border-radius:13px}
+    /* Mobile-only visitor grouping management (no changes to the map). */
+    .visitor-heading {display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;flex:1 1 auto}
+    .visitor-heading > div{min-width:0}
+    .visitor-manage-btn{flex:none}
+    .manage-controls{padding:14px 17px;border-bottom:1px solid #c6d8c1;background:rgba(237,248,235,.65)}
+    .manage-controls p{margin:0 0 11px;font-size:12px;line-height:1.5;color:var(--muted)}
+    .manage-controls label{display:block;font-size:12px;font-weight:700;color:var(--ink)}
+    .manage-controls input{display:block;width:100%;min-height:42px;border:1px solid #b7ccb3;border-radius:9px;padding:9px 12px;margin:5px 0 12px;background:#fff;color:var(--ink)}
+    .manage-actions{display:flex;flex-wrap:wrap;gap:8px}
+    .manage-actions .btn{flex:1 1 120px;min-height:42px}
+    .manage-status{margin:10px 0 0!important;font-size:12px;overflow-wrap:anywhere}
+    .manage-status.is-error{color:#a63a3a!important}
+    .visitor-card.is-picked{background:#e0f1df;border-color:#4c8860;box-shadow:inset 0 0 0 1px #5c9470}
+    .visitor-select-symbol{flex:none;font-size:21px;line-height:1;color:#315e49}
+    .visitor-linked-count{display:inline-block;font-size:11px;color:#40684e;font-weight:700;white-space:nowrap}
+    .linked-identities{padding:12px 20px 17px;border-top:1px solid #dae8d7}
+    .linked-header{display:flex;justify-content:space-between;gap:9px;align-items:center;list-style:none;cursor:pointer;padding:5px 0}
+    .linked-header::-webkit-details-marker{display:none}
+    .linked-header::marker{content:""}
+    .linked-header:focus-visible{outline:3px solid #a2cbaa;outline-offset:2px;border-radius:5px}
+    .linked-identities[open] .linked-header{margin-bottom:9px}
+    .linked-header strong{font-size:14px}
+    .linked-header span{color:var(--muted);font-size:11px}
+    /* Small chevron; the native <details> element still controls expansion. */
+    .linked-header #linked-count::after {
+      content:"";
+      display:inline-block;
+      width:7px;
+      height:7px;
+      margin-left:10px;
+      border-right:2px solid currentColor;
+      border-bottom:2px solid currentColor;
+      transform:translateY(-2px) rotate(45deg);
+      transition:transform 160ms ease;
+      vertical-align:middle;
+    }
+    .linked-identities[open] .linked-header #linked-count::after {
+      transform:translateY(2px) rotate(225deg);
+    }
+
+    .linked-entry{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid #e2ecdf}
+    .linked-entry:first-child{border-top:0}
+    .linked-entry-details{min-width:0;flex:1 1 auto}
+    .linked-entry-details strong{display:block;font-size:12px;overflow-wrap:anywhere}
+    .linked-entry-details small{display:block;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45;overflow-wrap:anywhere}
+    .linked-entry .btn{flex:none;padding:8px 11px;min-height:38px}
+    .linked-note{font-size:11px;line-height:1.5;color:var(--muted);margin:7px 0 0}
+    @media(max-width:650px) {
+      .visitor-search-wrap {flex:1 1 100%;}
+      .visitor-list {padding:10px}
+      .visitor-card {padding:12px 13px}
+      .profile-facts div {padding:12px 10px}
+      .view-topbar{margin:2px 0 12px}
+      .record-card{padding:13px 14px}
+    }
+  </style>
+</head>
+<body>
+  <main id="login" class="login-wrap">
+    <form id="login-form" class="login-panel" autocomplete="on">
+      <div class="brand-icon" aria-hidden="true">🏰</div>
+      <div class="eyebrow" style="text-align:center;margin-bottom:8px">Activity monitoring</div>
+      <h1>Disney Activity</h1>
+      <p>Admin access only. Sign in to view visits analytics.</p>
+      <label class="field">Email<input id="email" type="email" required autocomplete="username" spellcheck="false" placeholder="Administrator email"></label>
+      <label class="field">Password<input id="password" type="password" required autocomplete="current-password" placeholder="Administrator password"></label>
+      <button class="btn primary" id="login-btn" type="submit">Sign in</button>
+      <div id="login-error" class="error hidden" role="alert"></div>
+      <p class="hint">This uses your separate Supabase administrator account, not GitHub credentials.</p>
+      <a class="map-return" href="./index.html">Return to Disney map</a>
+    </form>
+  </main>
+  <main id="dashboard" class="shell hidden">
+    <header class="top">
+      <div class="brand"><div class="brand-icon" aria-hidden="true">🏰</div><div><div class="eyebrow">Activity monitoring</div><h1>Disney Activity</h1><p class="sub">Greyson's Disney Trip</p></div></div>
+      <div class="top-actions"><span id="status" class="status" role="status" aria-live="polite">Loading…</span><a class="btn" href="./index.html" style="text-decoration:none;text-align:center">Map</a><button id="refresh" class="btn" type="button">Refresh</button><button id="logout" class="btn" type="button">Sign out</button></div>
+    </header>
+    <div id="last-sync" class="last-sync">Waiting for report…</div>
+
+    <div id="overview-view">
+      <div class="summary-period-controls" role="group" aria-label="Statistics period">
+        <button type="button" class="btn" data-summary-period="24h" aria-pressed="true">Last 24h</button>
+        <button type="button" class="btn" data-summary-period="all" aria-pressed="false">All time</button>
+      </div>
+      <section class="stats" aria-label="Overview statistics">
+        <article class="stat"><div id="stat-visitors" class="num">—</div><div class="name">Tracked profiles</div><div class="desc">Unique browser / app identifiers, not necessarily distinct people</div></article>
+        <article class="stat"><div id="stat-sessions" class="num">—</div><div class="name">Total sessions</div><div class="desc">Recorded launches / sessions within the selected period</div></article>
+        <article class="stat"><div id="stat-active" class="num">—</div><div class="name">Recently active</div><div class="desc">Open sessions with activity in the last 2 minutes</div></article>
+        <article class="stat"><div id="stat-standalone" class="num">—</div><div class="name">Home Screen launches</div><div class="desc">Standalone app sessions within the selected period</div></article>
+        <article class="stat"><div id="stat-browser" class="num">—</div><div class="name">Browser launches</div><div class="desc">Browser sessions within the selected period</div></article>
+        <article class="stat"><div id="stat-events" class="num">—</div><div class="name">Feature interactions</div><div class="desc">Recorded feature events within the selected period</div></article>
+      </section>
+      <section class="panel visitors-panel" aria-labelledby="visitors-title">
+        <div class="panel-head">
+          <div class="visitor-heading"><div><h2 id="visitors-title">Visitors</h2><div class="meta">Select a visitor to view their sessions and activity</div></div><button type="button" id="manage-toggle" class="btn visitor-manage-btn" aria-pressed="false">Manage</button></div>
+          <div class="visitor-search-wrap">
+            <input class="search" id="visitor-search" type="search" placeholder="Find a visitor" aria-label="Filter visitors by name" autocomplete="off">
+            <button id="visitor-clear" class="visitor-clear hidden" type="button" aria-label="Clear visitor search" title="Clear search">×</button>
+          </div>
+        </div>
+        <div id="manage-controls" class="manage-controls hidden">
+          <p>Select two or more visitor cards to combine them. Existing sessions and events are preserved. You can separate linked identities in their profile later.</p>
+          <label for="merge-name">Name for merged visitor<input id="merge-name" type="text" maxlength="80" autocomplete="off" placeholder="Display name"></label>
+          <div class="manage-actions"><button type="button" id="merge-selected" class="btn primary" disabled>Merge selected (0)</button><button type="button" id="manage-done" class="btn">Done</button></div>
+          <p id="manage-message" class="manage-status" role="status" aria-live="polite"></p>
+        </div>
+        <div id="visitors-list" class="visitor-list"></div>
+        <div id="visitors-empty" class="empty hidden">No matching visitors yet.</div>
+      </section>
+    </div>
+
+    <section id="visitor-view" class="hidden" aria-label="Selected visitor details">
+      <div class="view-topbar"><span class="view-eyebrow">Visitor profile</span><button class="back-button" id="visitor-back" type="button" aria-label="Back to visitors">← Visitors</button></div>
+      <section class="panel" aria-labelledby="visitor-name">
+        <div class="profile-header"><h2 id="visitor-name">Visitor</h2><p id="visitor-first-seen">First seen: —</p></div>
+        <dl class="profile-facts">
+          <div><dt>Last seen</dt><dd id="visitor-last-seen">—</dd></div>
+          <div><dt>Recent status</dt><dd id="visitor-status">—</dd></div>
+          <div><dt>Observed access</dt><dd id="visitor-access">—</dd></div>
+          <div><dt>Device / Platform</dt><dd id="visitor-device">—</dd></div>
+        </dl>
+        <details class="linked-identities" id="linked-identities">
+          <summary class="linked-header"><strong>Linked identities</strong><span id="linked-count">—</span></summary>
+          <div id="linked-list"></div>
+          <p class="linked-note">Separate an identity to give it its own visitor card.</p>
+        </details>
+      </section>
+      <div class="previews">
+        <button type="button" class="preview-card" id="open-sessions" aria-label="Show this visitor's sessions">
+          <span class="preview-title-row">Sessions <span class="arrow" aria-hidden="true">›</span></span>
+          <span class="preview-subtitle">Latest session</span>
+          <span class="preview-data" id="session-preview">No available sessions</span>
+        </button>
+        <button type="button" class="preview-card" id="open-activity" aria-label="Show this visitor's activity">
+          <span class="preview-title-row">Activity <span class="arrow" aria-hidden="true">›</span></span>
+          <span class="preview-subtitle">Latest recorded event</span>
+          <span class="preview-data" id="activity-preview">No available feature activity</span>
+        </button>
+      </div>
+      <p class="history-note">Session and activity previews are limited to the newest 100 records of each type across all visitors.</p>
+    </section>
+
+    <section id="records-view" class="hidden" aria-label="Visitor record history">
+      <div class="view-topbar"><span class="view-eyebrow">Visitor history</span><button class="back-button" id="records-back" type="button" aria-label="Back to visitor profile">← Profile</button></div>
+      <div class="records-head"><h2 id="records-title">Sessions</h2><p id="records-subtitle">Newest records first</p></div>
+      <div id="records-list" class="records-list"></div>
+      <div id="records-empty" class="empty record-empty hidden">No records available for this visitor.</div>
+      <p class="history-note">Records shown are from the latest 100 sessions or feature events across all visitors, not necessarily a visitor's full history.</p>
+    </section>
+
+    <p id="dashboard-foot" class="foot">Statistics follow the selected reporting period; recently active always means the last 2 minutes. Report history is limited to the latest 100 records of each type. This dashboard refreshes every 60 seconds while visible.</p>
+  </main>
+  <script>
+    "use strict";
+    // Public Supabase configuration. Never insert a secret/service_role key here.
+    const PROJECT_URL = "https://kdlbnceepmcumxlnicvx.supabase.co";
+    const PUBLISHABLE_KEY = "sb_publishable_3LhyCSgyD1hBrV8JLZ1VLA_9K1-G-V_";
+    const REPORT_URL = `${PROJECT_URL}/functions/v1/disney-activity-report`;
+    const PROFILES_URL = `${PROJECT_URL}/functions/v1/disney-activity-profiles`;
+    // Shared only with the map page on the same origin, never with family visitors.
+    // The reporting endpoint still authenticates and authorizes each request.
+    const SESSION_KEY = "greyson-disney-admin-session-v1";
+    const state = { session: null, report: null, loading: false, period: "24h", view: "overview", visitorId: null, overviewScroll: 0,
+      links: [], linksLoaded: false, linksError: "", manage: false, selectedGroups: new Set(), saving: false, linksRevision: 0 };
+    function storeSession() {
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(state.session)); } catch (_) { /* private browsing */ }
+    }
+    function clearSession() {
+      try { localStorage.removeItem(SESSION_KEY); } catch (_) { /* private browsing */ }
+    }
+    function readSession() {
+      try {
+        const value = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+        if (value && typeof value.accessToken === "string" && typeof value.refreshToken === "string" && Number.isFinite(value.expiresAt)) return value;
+      } catch (_) { /* invalid/disabled storage */ }
+      return null;
+    }
+    const el = id => document.getElementById(id);
+    const formatNumber = n => Number(n || 0).toLocaleString();
+    const parseTime = value => value ? Date.parse(value) : NaN;
+    const dateTime = value => {
+      const t = parseTime(value);
+      return Number.isFinite(t) ? new Date(t).toLocaleString(undefined, {dateStyle:"medium",timeStyle:"short"}) : "—";
+    };
+    const ago = value => {
+      const t = parseTime(value); if (!Number.isFinite(t)) return "—";
+      const seconds = Math.max(0, Math.floor((Date.now()-t)/1000));
+      if(seconds<60) return "Just now";
+      if(seconds<3600) return `${Math.floor(seconds/60)} min ago`;
+      if(seconds<86400) return `${Math.floor(seconds/3600)} hr ago`;
+      return dateTime(value);
+    };
+    function setStatus(message,error=false){const s=el("status");s.textContent=message;s.classList.toggle("error",error)}
+    async function apiError(response){
+      let body={};try{body=await response.json()}catch{}
+      const message=typeof body.msg==="string"?body.msg:typeof body.error_description==="string"?body.error_description:typeof body.error==="string"?body.error:`HTTP ${response.status}`;
+      return new Error(message);
+    }
+    async function tokenRequest(grantType,body){
+      const response=await fetch(`${PROJECT_URL}/auth/v1/token?grant_type=${encodeURIComponent(grantType)}`,{method:"POST",headers:{"apikey":PUBLISHABLE_KEY,"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store"});
+      if(!response.ok)throw await apiError(response);
+      const data=await response.json();
+      if(!data.access_token||!data.refresh_token)throw new Error("Authentication response was incomplete");
+      state.session={accessToken:data.access_token,refreshToken:data.refresh_token,expiresAt:Date.now()+Number(data.expires_in||3600)*1000};
+      storeSession();
+    }
+    async function ensureSession(){
+      if(!state.session)throw new Error("Please sign in");
+      if(Date.now()>state.session.expiresAt-90000){
+        await tokenRequest("refresh_token",{refresh_token:state.session.refreshToken});
+      }
+      return state.session.accessToken;
+    }
+    function signOut(){
+      state.session=null;state.report=null;state.view="overview";state.visitorId=null;
+      state.links=[];state.linksLoaded=false;state.linksError="";state.manage=false;state.selectedGroups.clear();clearSession();
+      setView("overview", false);
+      el("password").value="";
+      el("dashboard").classList.add("hidden");el("login").classList.remove("hidden");
+      el("login-error").classList.add("hidden");el("email").focus();
+    }
+    el("login-form").addEventListener("submit",async event=>{
+      event.preventDefault();const button=el("login-btn");const error=el("login-error");
+      button.disabled=true;button.textContent="Signing in…";error.classList.add("hidden");
+      try{
+        await tokenRequest("password",{email:el("email").value.trim(),password:el("password").value});
+        el("password").value="";
+        await loadReport();
+        el("login").classList.add("hidden");el("dashboard").classList.remove("hidden");
+      }catch(e){state.session=null;clearSession();error.textContent=`Sign-in or access failed: ${e.message}`;error.classList.remove("hidden")}
+      finally{button.disabled=false;button.textContent="Sign in"}
+    });
+    async function loadReport(){
+      if(state.loading||!state.session)return;
+      state.loading=true;el("refresh").disabled=true;setStatus("Refreshing…");
+      updatePeriodButtons();
+      try{
+        const token=await ensureSession();
+        const reportUrl=new URL(REPORT_URL);
+        reportUrl.searchParams.set("period",state.period);
+        const response=await fetch(reportUrl.href,{
+          method:"GET",headers:{apikey:PUBLISHABLE_KEY,Authorization:`Bearer ${token}`},cache:"no-store"
+        });
+        if(!response.ok){let error=await apiError(response);if(response.status===401||response.status===403){signOut()}throw error}
+        const report=await response.json();
+        if(!report.ok||!report.summary)throw new Error("Report response was incomplete");
+        state.report=report;
+        // Reporting is independent of the optional visitor-management service.
+        // Show the dashboard immediately, even on a slow or unavailable network.
+        renderReport(report);
+        if (!state.saving) {
+          void loadProfileLinks().then(() => {
+            if (state.session && state.report === report) renderReport(report);
+          });
+        }
+        setStatus("Updated successfully");
+        el("last-sync").textContent=`Last refreshed: ${dateTime(report.generatedAt)}`;
+      }catch(e){setStatus(e.message,true);if(el("dashboard").classList.contains("hidden"))throw e}
+      finally{state.loading=false;el("refresh").disabled=false;updatePeriodButtons()}
+    }
+    // Fetch saved associations separately so the existing reporting endpoint
+    // and its latest-100 history behavior remain unchanged.
+    async function loadProfileLinks(){
+      // Avoid indefinitely pending requests on weak hotel or park connections.
+      const revision=state.linksRevision;
+      const currentSession=state.session;
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),8000);
+      try{
+        const token=await ensureSession();
+        const response=await fetch(PROFILES_URL,{method:"GET",headers:{apikey:PUBLISHABLE_KEY,Authorization:`Bearer ${token}`},cache:"no-store",signal:controller.signal});
+        if(!response.ok)throw await apiError(response);
+        const data=await response.json();
+        if(!data.ok||!Array.isArray(data.links))throw new Error("Profile association response was incomplete");
+        // Do not allow a stale GET to undo a just-saved merge/separation.
+        if(state.linksRevision!==revision||state.session!==currentSession)return;
+        state.links=data.links;
+        state.linksLoaded=true;
+        state.linksError="";
+      }catch(error){
+        if(state.linksRevision!==revision||state.session!==currentSession)return;
+        // Keep the dashboard functional when the optional endpoint is unavailable.
+        state.linksLoaded=false;
+        state.linksError="Profile management unavailable. Check the administrator profile function and internet connection.";
+      }finally{
+        clearTimeout(timeout);
+      }
+    }
+    function normalizedName(name){return String(name||"").trim().replace(/\s+/g," ").toLocaleLowerCase()}
+    function visitorGroups(){
+      const visitors=Array.isArray(state.report?.visitors)?state.report.visitors:[];
+      const links=new Map(state.links.map(x=>[x.visitor_id,x]));
+      const groups=new Map();
+      for(const visitor of visitors){
+        const link=links.get(visitor.visitor_id);
+        const name=String(visitor.display_name||"Unnamed visitor").trim();
+        const key=link?.group_id?`linked:${link.group_id}`:`name:${normalizedName(name) || visitor.visitor_id}`;
+        if(!groups.has(key))groups.set(key,{visitor_id:key,display_name:link?.group_label||name,members:[],first_seen_at:visitor.first_seen_at,last_seen_at:visitor.last_seen_at});
+        const group=groups.get(key);
+        group.members.push(visitor);
+        if(parseTime(visitor.first_seen_at)<parseTime(group.first_seen_at))group.first_seen_at=visitor.first_seen_at;
+        if(parseTime(visitor.last_seen_at)>parseTime(group.last_seen_at)){
+          group.last_seen_at=visitor.last_seen_at;
+          if(!link?.group_label)group.display_name=name;
+        }
+      }
+      return Array.from(groups.values()).sort((a,b)=>parseTime(b.last_seen_at)-parseTime(a.last_seen_at));
+    }
+    function groupMembers(key){return visitorGroups().find(group=>group.visitor_id===key)?.members||[]}
+    function setManageMessage(message,error=false){
+      el("manage-message").textContent=message;
+      el("manage-message").classList.toggle("is-error",error);
+    }
+    function updateManageUI(){
+      el("manage-toggle").textContent=state.manage?"Cancel":"Manage";
+      el("manage-toggle").setAttribute("aria-pressed",String(state.manage));
+      el("manage-controls").classList.toggle("hidden",!state.manage);
+      const count=state.selectedGroups.size;
+      const button=el("merge-selected");
+      button.textContent=state.saving?"Saving…":`Merge selected (${count})`;
+      button.disabled=count<2||!state.linksLoaded||state.saving;
+      el("manage-toggle").disabled=state.saving;
+      el("manage-done").disabled=state.saving;
+      if(state.manage&&!state.linksLoaded)setManageMessage(state.linksError||"Profile management requires an internet connection.",true);
+      else if(state.manage&&!state.saving&&!state.linksError&&count===0)setManageMessage("Select visitors to merge.");
+    }
+    function closeManage(){state.manage=false;state.selectedGroups.clear();setManageMessage("");updateManageUI();renderVisitors()}
+    async function writeProfileLinks(payload){
+      if(!state.linksLoaded||state.saving)throw new Error("Profile management is unavailable");
+      state.saving=true;
+      state.linksRevision++;
+      updateManageUI();
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),12000);
+      try{
+        const token=await ensureSession();
+        const response=await fetch(PROFILES_URL,{method:"POST",headers:{apikey:PUBLISHABLE_KEY,Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify(payload),cache:"no-store",signal:controller.signal});
+        if(!response.ok)throw await apiError(response);
+        const data=await response.json();
+        if(!data.ok||!Array.isArray(data.links))throw new Error("Unable to verify saved profile changes");
+        state.links=data.links;
+        state.linksLoaded=true;state.linksError="";
+        return true;
+      }catch(error){
+        // The server might have completed a request whose response was lost.
+        // Never claim a timed-out merge failed; ask the administrator to verify.
+        if(error?.name==="AbortError")throw new Error("Save could not be confirmed. Refresh the dashboard before trying again.");
+        throw error;
+      }finally{
+        clearTimeout(timeout);
+        state.saving=false;
+        updateManageUI();
+      }
+    }
+    async function mergeSelected(){
+      const selected=visitorGroups().filter(group=>state.selectedGroups.has(group.visitor_id));
+      if(selected.length<2)return;
+      const ids=Array.from(new Set(selected.flatMap(group=>group.members.map(member=>member.visitor_id))));
+      const label=el("merge-name").value.trim()||selected[0].display_name;
+      if(!label||[...label].length>80){setManageMessage("Choose a name with up to 80 characters.",true);return}
+      if(!window.confirm(`Merge ${selected.length} visitor profiles as “${label}”? All original records will be preserved.`))return;
+      try{
+        await writeProfileLinks({action:"merge",visitorIds:ids,label});
+        state.selectedGroups.clear();state.manage=false;
+        updateManageUI();renderReport(state.report);
+        const combined=visitorGroups().find(group=>group.members.some(m=>m.visitor_id===ids[0]));
+        if(combined){state.visitorId=combined.visitor_id;setView("visitor");renderVisitorDetails()}
+      }catch(error){setManageMessage(error.message||"Unable to merge visitors",true)}
+    }
+    async function separateIdentity(member){
+      const group=visitorById(state.visitorId);
+      if(!group||group.members.length<2||!state.linksLoaded||state.saving)return;
+      if(!window.confirm(`Separate “${member.display_name}” from “${group.display_name}”? No sessions or events will be deleted.`))return;
+      try{
+        await writeProfileLinks({action:"separate",visitorId:member.visitor_id});
+        renderReport(state.report);
+        // The original group usually remains after removing one member.
+        if(!visitorById(state.visitorId))backToOverview();
+      }catch(error){window.alert(error.message||"Unable to separate visitor")}
+    }
+    const modeLabel=mode=>mode==="standalone"?"Home Screen":mode==="browser"?"Browser":"Unknown";
+    const featureLabel=value=>String(value||"Unknown").replaceAll("_"," ");
+    function isActive(s){return Boolean(s&&!s.ended_at&&parseTime(s.last_active_at)>Date.now()-120000)}
+    function sessionStatus(s){return s.ended_at?"Ended":isActive(s)?"Active recently":"Inactive"}
+    function compactAgo(value){
+      const t=parseTime(value);if(!Number.isFinite(t))return "—";
+      const sec=Math.max(0,Math.floor((Date.now()-t)/1000));
+      if(sec<60)return "Just now";
+      if(sec<3600)return `${Math.floor(sec/60)} min ago`;
+      if(sec<86400)return `${Math.floor(sec/3600)} hr ago`;
+      if(sec<2592000)return `${Math.floor(sec/86400)} d ago`;
+      return new Date(t).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+    }
+    function node(tag,className,text){
+      const n=document.createElement(tag);
+      if(className)n.className=className;
+      if(text!==undefined)n.textContent=String(text);
+      return n;
+    }
+    function sortedSessions(groupKey){
+      const ids=new Set(groupMembers(groupKey).map(x=>x.visitor_id));
+      return (state.report?.sessions||[]).filter(s=>ids.has(s.visitor_id))
+        .sort((a,b)=>parseTime(b.started_at)-parseTime(a.started_at));
+    }
+    function sortedActivity(groupKey){
+      const ids=new Set(groupMembers(groupKey).map(x=>x.visitor_id));
+      return (state.report?.events||[]).filter(e=>ids.has(e.visitor_id))
+        .sort((a,b)=>parseTime(b.received_at)-parseTime(a.received_at));
+    }
+    function visitorById(groupKey){return visitorGroups().find(v=>v.visitor_id===groupKey)||null}
+    function setView(view, scrollTop=true){
+      state.view=view;
+      el("overview-view").classList.toggle("hidden",view!=="overview");
+      el("visitor-view").classList.toggle("hidden",view!=="visitor");
+      el("records-view").classList.toggle("hidden",view!=="sessions"&&view!=="activity");
+      if(scrollTop){
+        if(view==="overview") requestAnimationFrame(()=>window.scrollTo(0,state.overviewScroll));
+        else window.scrollTo(0,0);
+      }
+    }
+    function openVisitor(visitorId){
+      if(!visitorById(visitorId))return;
+      state.overviewScroll=window.scrollY;
+      state.visitorId=visitorId;
+      // Start each newly opened visitor profile with identities collapsed.
+      el("linked-identities").open=false;
+      setView("visitor");
+      renderVisitorDetails();
+    }
+    function backToOverview(){
+      state.visitorId=null;
+      setView("overview");
+    }
+    function openRecords(kind){
+      if(!state.visitorId)return;
+      setView(kind);
+      renderRecords();
+    }
+    function backToVisitor(){setView("visitor");renderVisitorDetails()}
+    function renderVisitors(){
+      if(!state.report)return;
+      const visitors=visitorGroups();
+      const term=el("visitor-search").value.trim().toLocaleLowerCase();
+      const matching=visitors.filter(v=>v.display_name.toLocaleLowerCase().includes(term)||v.members.some(m=>m.display_name.toLocaleLowerCase().includes(term)));
+      const list=el("visitors-list");list.replaceChildren();
+      for(const visitor of matching){
+        const sessions=sortedSessions(visitor.visitor_id);
+        const latestSession=sessions[0];
+        const latestEvent=sortedActivity(visitor.visitor_id)[0];
+        const active=sessions.some(isActive);
+        const selected=state.selectedGroups.has(visitor.visitor_id);
+        const card=node("button",`visitor-card${selected?" is-picked":""}`);
+        card.type="button";
+        card.setAttribute("aria-label",state.manage?`${selected?"Deselect":"Select"} ${visitor.display_name} for merging`:`View ${visitor.display_name}'s profile`);
+        if(state.manage)card.setAttribute("aria-pressed",String(selected));
+        const nameRow=node("span","visitor-card-name-row");
+        if(state.manage)nameRow.append(node("span","visitor-select-symbol",selected?"☑":"☐"));
+        nameRow.append(node("span","visitor-card-name",visitor.display_name),node("span","visitor-card-arrow",state.manage?"":"›"));
+        const statusRow=node("span","visitor-card-status-row");
+        statusRow.append(node("span","visitor-card-last",`Last seen: ${compactAgo(visitor.last_seen_at)}`));
+        statusRow.append(node("span",`pill${active?" green":""}`,active?"Recently active":"Not active"));
+        const accessRow=node("span","visitor-card-access-row");
+        accessRow.append(node("span","",latestSession
+          ?`${modeLabel(latestSession.launch_mode)} · ${latestSession.device_type||"Unknown device"} · ${latestSession.platform||"Unknown platform"}`
+          :"Access and device not yet observed"));
+        if(visitor.members.length>1)accessRow.append(node("span","visitor-linked-count",`${visitor.members.length} profiles`));
+        const featureRow=node("span","visitor-card-feature-row");
+        featureRow.append(node("strong","","Recent activity:"));
+        featureRow.append(node("span","",latestEvent?featureLabel(latestEvent.feature):"No recorded feature activity"));
+        card.append(nameRow,statusRow,accessRow,featureRow);
+        card.addEventListener("click",()=>{
+          if(!state.manage){openVisitor(visitor.visitor_id);return}
+          if(selected)state.selectedGroups.delete(visitor.visitor_id);
+          else state.selectedGroups.add(visitor.visitor_id);
+          if(state.selectedGroups.size===1){const only=visitorGroups().find(g=>state.selectedGroups.has(g.visitor_id));el("merge-name").value=only?.display_name||""}
+          setManageMessage("");updateManageUI();renderVisitors();
+        });
+        list.append(card);
+      }
+      el("visitors-empty").classList.toggle("hidden",matching.length>0);
+      el("visitor-clear").classList.toggle("hidden",el("visitor-search").value.length===0);
+      updateManageUI();
+    }
+    function renderVisitorDetails(){
+      const visitor=visitorById(state.visitorId);
+      if(!visitor){backToOverview();return}
+      const sessions=sortedSessions(visitor.visitor_id);
+      const session=sessions[0];
+      const active=sessions.some(isActive);
+      const event=sortedActivity(visitor.visitor_id)[0];
+      el("visitor-name").textContent=visitor.display_name||"Unnamed visitor";
+      el("visitor-first-seen").textContent=`First seen: ${dateTime(visitor.first_seen_at)}`;
+      el("visitor-last-seen").textContent=compactAgo(visitor.last_seen_at);
+      const status=el("visitor-status");
+      status.textContent=active?"Recently active":"Not active";
+      status.classList.toggle("active-text",active);
+      el("visitor-access").textContent=session?modeLabel(session.launch_mode):"Not yet observed";
+      el("visitor-device").textContent=session
+        ?`${session.device_type||"Unknown"} · ${session.platform||"Unknown"}`:"—";
+      el("session-preview").textContent=session
+        ?`Started ${dateTime(session.started_at)} · ${modeLabel(session.launch_mode)} · ${sessionStatus(session)} · Last active ${compactAgo(session.last_active_at)}`
+        :"No sessions in the available report history";
+      el("activity-preview").textContent=event
+        ?`${featureLabel(event.feature)} · ${featureLabel(event.event_type)} · Received ${dateTime(event.received_at)}`
+        :"No feature activity in the available report history";
+      el("records-back").textContent=`← ${visitor.display_name||"Profile"}`;
+      el("linked-count").textContent=`${visitor.members.length} ${visitor.members.length===1?"identity":"identities"}`;
+      const list=el("linked-list");list.replaceChildren();
+      const ordered=visitor.members.slice().sort((a,b)=>parseTime(b.last_seen_at)-parseTime(a.last_seen_at));
+      for(const member of ordered){
+        const row=node("div","linked-entry");
+        const details=node("div","linked-entry-details");
+        const shortId=member.visitor_id.slice(0,8);
+        details.append(node("strong","",member.display_name),node("small","",`Last seen ${compactAgo(member.last_seen_at)} · ID ${shortId}…`));
+        const observedSession=(state.report?.sessions||[]).filter(x=>x.visitor_id===member.visitor_id)
+          .sort((a,b)=>parseTime(b.started_at)-parseTime(a.started_at))[0];
+        details.append(node("small","",observedSession
+          ?`${modeLabel(observedSession.launch_mode)} · ${observedSession.device_type||"Unknown"} · ${observedSession.platform||"Unknown"}`
+          :"No session details in the latest report"));
+        row.append(details);
+        if(visitor.members.length>1){
+          const separate=node("button","btn","Separate");
+          separate.type="button";
+          separate.disabled=!state.linksLoaded||state.saving;
+          separate.setAttribute("aria-label",`Separate identity ${shortId} from ${visitor.display_name}`);
+          separate.addEventListener("click",()=>void separateIdentity(member));
+          row.append(separate);
+        }
+        list.append(row);
+      }
+      el("linked-list").title=state.linksLoaded?"":"Profile separation requires the private administrator profile service.";
+    }
+    function field(label,value){
+      const div=node("div","record-field");
+      div.append(node("span","label",label),node("span","value",value));
+      return div;
+    }
+    function renderRecords(){
+      const visitor=visitorById(state.visitorId);
+      if(!visitor){backToOverview();return}
+      const sessions=state.view==="sessions";
+      el("records-title").textContent=sessions?"Sessions":"Activity";
+      el("records-subtitle").textContent=`${visitor.display_name||"Visitor"} · Newest first`;
+      el("records-back").textContent=`← ${visitor.display_name||"Profile"}`;
+      const records=sessions?sortedSessions(visitor.visitor_id):sortedActivity(visitor.visitor_id);
+      const list=el("records-list");list.replaceChildren();
+      for(const record of records){
+        const card=node("article","record-card");
+        const head=node("div","record-card-head");
+        if(sessions){
+          head.append(node("strong","",dateTime(record.started_at)));
+          const status=sessionStatus(record);
+          head.append(node("span",`pill${status==="Active recently"?" green":""}`,status));
+          const grid=node("div","record-grid");
+          grid.append(
+            field("Started",dateTime(record.started_at)),
+            field("Last active",dateTime(record.last_active_at)),
+            field("Access",modeLabel(record.launch_mode)),
+            field("Device / Platform",`${record.device_type||"Unknown"} · ${record.platform||"Unknown"}`),
+            field("Ended",record.ended_at?dateTime(record.ended_at):"No end recorded")
+          );
+          card.append(head,grid);
+        }else{
+          head.append(node("strong","",featureLabel(record.feature)));
+          head.append(node("span","pill",featureLabel(record.event_type)));
+          const grid=node("div","record-grid");
+          grid.append(
+            field("Event",featureLabel(record.event_type)),
+            field("Feature",featureLabel(record.feature)),
+            field("Time occurred",dateTime(record.occurred_at)),
+            field("Time received",dateTime(record.received_at))
+          );
+          card.append(head,grid);
+        }
+        list.append(card);
+      }
+      el("records-empty").classList.toggle("hidden",records.length>0);
+    }
+    function renderReport(report){
+      const s=report.summary;
+      el("stat-visitors").textContent=formatNumber(s.uniqueInstallations);
+      el("stat-sessions").textContent=formatNumber(s.totalSessions);
+      el("stat-active").textContent=formatNumber(s.currentlyActive);
+      el("stat-standalone").textContent=formatNumber(s.standaloneLaunches);
+      el("stat-browser").textContent=formatNumber(s.browserLaunches);
+      el("stat-events").textContent=formatNumber(s.totalFeatureEvents);
+      renderVisitors();
+      if(state.view==="visitor")renderVisitorDetails();
+      if(state.view==="sessions"||state.view==="activity")renderRecords();
+    }
+    function updatePeriodButtons(){
+      document.querySelectorAll("[data-summary-period]").forEach(button=>{
+        button.setAttribute("aria-pressed",String(button.dataset.summaryPeriod===state.period));
+        button.disabled=state.loading;
+      });
+    }
+    el("manage-toggle").addEventListener("click",()=>{
+      if(state.manage){closeManage();return}
+      state.manage=true;state.selectedGroups.clear();el("merge-name").value="";setManageMessage("");updateManageUI();renderVisitors();
+    });
+    el("manage-done").addEventListener("click",closeManage);
+    el("merge-selected").addEventListener("click",()=>void mergeSelected());
+    el("refresh").addEventListener("click",loadReport);
+    el("logout").addEventListener("click",signOut);
+    const visitorSearch=el("visitor-search");
+    visitorSearch.addEventListener("input",renderVisitors);
+    visitorSearch.addEventListener("keydown",event=>{
+      if(event.key==="Enter"){event.preventDefault();visitorSearch.blur()}
+    });
+    el("visitor-clear").addEventListener("click",()=>{
+      visitorSearch.value="";
+      renderVisitors();
+      visitorSearch.focus({preventScroll:true});
+    });
+    document.addEventListener("pointerdown",event=>{
+      if(document.activeElement===visitorSearch &&
+        event.target!==visitorSearch && !el("visitor-clear").contains(event.target)){
+        visitorSearch.blur();
+      }
+    },{capture:true});
+    el("visitor-back").addEventListener("click",backToOverview);
+    el("records-back").addEventListener("click",backToVisitor);
+    el("open-sessions").addEventListener("click",()=>openRecords("sessions"));
+    el("open-activity").addEventListener("click",()=>openRecords("activity"));
+    document.querySelectorAll("[data-summary-period]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        if(state.loading||button.dataset.summaryPeriod===state.period)return;
+        state.period=button.dataset.summaryPeriod;
+        updatePeriodButtons();
+        void loadReport();
+      });
+    });
+    window.setInterval(()=>{if(!document.hidden&&state.session)loadReport()},60000);
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden&&state.session)loadReport()});
+    // Restore an existing authorized session on repeat visits. A saved session
+    // is never treated as proof of administrator access until the report returns.
+    async function restoreLogin(){
+      const saved=readSession();if(!saved)return;
+      state.session=saved;
+      try{
+        await loadReport();
+        if(state.report){
+          el("login").classList.add("hidden");
+          el("dashboard").classList.remove("hidden");
+        }
+      }catch(error){
+        // Authorization failures clear the local session in loadReport.
+        // Transient network failures retain it for a later online retry.
+        const e=el("login-error");
+        e.textContent=state.session?"Dashboard unavailable. Please reconnect and reload.":"Session expired. Please sign in again.";
+        e.classList.remove("hidden");
+      }
+    }
+    updatePeriodButtons();
+    restoreLogin();
+  </script>
+</body>
+</html>

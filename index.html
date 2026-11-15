@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#b8cbb0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Greyson's Disney Trip" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Disneyland Resort — Interactive Map</title>
+  <link rel="stylesheet" href="vendor/leaflet.css" />
+  <link rel="stylesheet" href="vendor/leaflet-double-touch-drag-zoom.css" />
+  <link rel="stylesheet" href="places-ui.css" />
+  <link rel="stylesheet" href="wait-times.css" />
+  <link rel="stylesheet" href="gps-ui.css" />
+  <link rel="stylesheet" href="itinerary-ui.css" />
+  <link rel="stylesheet" href="toolbar-ui.css" />
+  <link rel="stylesheet" href="disney-activity-tracker.css" />
+  <link rel="stylesheet" href="disney-admin-overlay.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <style>
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    #map {
+	  position: fixed;
+	  inset: 0;
+	  background: #b8cbb0;
+	}
+    .leaflet-control-focus { position: relative; margin-top: 8px; }
+    .focus-trigger {
+      display: block; padding: 7px 11px; border: 2px solid rgba(0,0,0,.2);
+      border-radius: 6px; box-shadow: 0 1px 5px #0004; background: #fff;
+      font: 600 13px/1.4 system-ui,-apple-system,sans-serif; color: #1f2937;
+      cursor: pointer; touch-action: manipulation;
+    }
+    .focus-trigger:hover, .focus-trigger:focus-visible { background: #f1f5f9; }
+    .focus-menu {
+      position: absolute; left: 0; top: calc(100% + 5px); width: 200px;
+      padding: 5px; border-radius: 8px; background: #fff;
+      box-shadow: 0 3px 16px #0004; border: 1px solid #d1d5db;
+    }
+    .focus-menu[hidden] { display: none; }
+    .focus-option {
+      display: block; width: 100%; box-sizing: border-box; text-align: left;
+      border: 0; border-radius: 5px; background: transparent; padding: 10px;
+      color: #1f2937; font: 14px system-ui,-apple-system,sans-serif; cursor: pointer;
+    }
+    .focus-option:hover, .focus-option:focus-visible { background: #eff6ff; }
+    .leaflet-top { top: env(safe-area-inset-top, 0px); }
+    .leaflet-bottom { bottom: env(safe-area-inset-bottom, 0px); }
+    .map-info {
+      position: absolute;
+      z-index: 1000;
+      top: calc(12px + env(safe-area-inset-top, 0px));
+      right: calc(12px + env(safe-area-inset-right, 0px));
+      max-width: min(290px, calc(100vw - 105px));
+      padding: 9px 12px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 2px 12px #0002;
+      font-size: 13px;
+      line-height: 1.35;
+      pointer-events: none;
+    }
+    .map-info strong { display: block; }
+    .map-info small { display: block; color: #4b5563; }
+    @media (max-width: 540px) {
+      .map-info { padding: 7px 9px; font-size: 12px; }
+      .map-info small { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="map" role="region" aria-label="Disneyland Resort map"></div>
+  <div class="map-info">
+    <strong>Greyson's Disney Trip</strong>
+  </div>
+  <script src="vendor/leaflet.js"></script>
+  <script src="vendor/leaflet-double-touch-drag-zoom.js"></script>
+  <script>
+    // Full set of locally downloaded tiles. Keep these bounds unchanged so no
+    // original artwork is lost (512px source images display at 256 CSS pixels).
+    const coverage = { z: 16, minX: 11299, maxX: 11302, minY: 26219, maxY: 26222 };
+
+    function xyzToLatLng(x, y, z) {
+      const n = 2 ** z;
+      const lon = x / n * 360 - 180;
+      const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI;
+      return [lat, lon];
+    }
+
+    const tileBounds = L.latLngBounds(
+      xyzToLatLng(coverage.minX, coverage.minY, coverage.z),
+      xyzToLatLng(coverage.maxX + 1, coverage.maxY + 1, coverage.z)
+    );
+	
+	
+	const artworkBounds = L.latLngBounds(
+      [33.80197, -117.93097], // Southwest trimmed edge
+      [33.81987, -117.91281]  // Northeast trimmed edge
+	);
+
+
+    // Approximate street-centered perimeter (including the roads):
+    // West: S Walnut St; south: W Katella Ave;
+    // East: S Harbor Blvd; north: W Ball Rd.
+    // This restricts navigation only; the original tile files are untouched.
+    // Street alignments are not perfectly rectangular, so these values can be
+    // fine-tuned visually after testing.
+    const streetBounds = L.latLngBounds(
+      [33.80275, -117.92920], // Katella Ave / Walnut St vicinity
+      [33.81880, -117.91485]  // Ball Rd / Harbor Blvd vicinity
+    );
+
+    // Approximate regions for the view selector. These do not alter the mask.
+    const parkViews = {
+      resort: streetBounds,
+      disneyland: L.latLngBounds(
+        [33.8088, -117.9228],
+        [33.8166, -117.9157]
+      ),
+      california: L.latLngBounds(
+        [33.8042, -117.9225],
+        [33.8093, -117.9169]
+      ),
+      downtown: L.latLngBounds(
+        [33.8079, -117.9262],
+        [33.8107, -117.9220]
+      )
+    };
+
+	
+    // ========================================
+    // MAP CAMERA SETTINGS
+    // ========================================
+    // Latitude:  increase = North, decrease = South
+    // Longitude: increase = East, decrease = West
+    // Zoom:      increase = Closer, decrease = Farther
+
+
+	const cameraViews = {
+
+	  // Initial view when opening the map
+	  initialMobile: {
+		center: [33.80928, -117.92017],
+	    zoom: 16.00
+	  },
+
+	  initialDesktop: {
+        center: [33.80928, -117.92017],
+        zoom: 17.00
+	  },
+
+      // Centering dropdown selections
+      resort: {
+        center: [33.80928, -117.92017],
+        zoom: 16.00
+      },
+
+      disneyland: {
+        center: [33.81270, -117.91945],
+        zoom: 16.50
+      },
+
+      california: {
+        center: [33.80675, -117.91970],
+        zoom: 16.50
+      },
+
+      downtown: {
+        center: [33.80930, -117.92350],
+        zoom: 17.55
+      }
+    };
+	
+	const desktopCameraViews = {
+	  resort: {
+        center: [33.81078, -117.92203],
+        zoom: 16.50
+	  },
+
+	  disneyland: {
+        center: [33.81270, -117.91925],
+        zoom: 17.35
+	  },
+
+	  california: {
+        center: [33.80675, -117.91970],
+        zoom: 17.55
+	  },
+
+	  downtown: {
+        center: [33.80930, -117.92350],
+        zoom: 18.25
+      }
+	};
+
+
+    const map = L.map('map', {
+      zoomControl: false,
+      minZoom: 14, // Allows fitted overview on narrow phone screens.
+      maxZoom: 20,
+      zoomSnap: 0.05,
+      zoomDelta: 0.5,
+	  doubleClickZoom: true,
+	  touchZoom: true,
+	  doubleTouchDragZoom: true,
+	  doubleTouchDragZoomInvert: true,
+	  doubleTouchDragZoomScaleFactor: 100,
+      maxBoundsViscosity: 1.0,
+      attributionControl: false
+    });
+	
+
+    L.tileLayer('tiles/{z}/{x}/{y}.jpg', {
+      tileSize: 256,
+      minZoom: 14,
+      minNativeZoom: 16, // Scale existing zoom-16 tiles down; no new files.
+      maxZoom: 20,
+      maxNativeZoom: 20,
+      noWrap: true,
+      bounds: tileBounds,
+      keepBuffer: 3,
+      updateWhenIdle: true,
+    }).addTo(map);
+
+    function updateMinZoom() {
+	  map.setMinZoom(15);
+    }
+
+    
+	function focusResort(animate = false) {
+	  const view = cameraViews.resort;
+
+	  map.setView(view.center, view.zoom, {
+	    animate
+	  });
+	}
+
+    
+	function focusInitialView(animate = false) {
+	  const mobile = window.matchMedia('(max-width: 900px)').matches;
+
+	  const view = mobile
+        ? cameraViews.initialMobile
+        : cameraViews.initialDesktop;
+
+      if (animate) {
+        map.flyTo(view.center, view.zoom, {
+          duration: 0.65
+      });
+      } else {
+        map.setView(view.center, view.zoom, {
+          animate: false
+        });
+      }
+    }
+    
+
+	function configureNavigationBounds() {
+	  // Restrict the map CENTER to the street rectangle.
+	  // Expand Leaflet's viewport bounds by half the
+	  // current screen size so its native restriction
+	  // allows every street-boundary point to be centered.
+
+	  const zoom = map.getZoom();
+	  if (!Number.isFinite(zoom)) return;
+
+	  const halfScreen = map.getSize().divideBy(2);
+
+	  const sw = map.project(
+        streetBounds.getSouthWest(), zoom
+      );
+
+	  const ne = map.project(
+		streetBounds.getNorthEast(), zoom
+	  );
+
+	  const expandedSW = map.unproject(
+		L.point(
+		  sw.x - halfScreen.x,
+		  sw.y + halfScreen.y
+		),
+		zoom
+	  );
+
+	  const expandedNE = map.unproject(
+		L.point(
+		  ne.x + halfScreen.x,
+		  ne.y - halfScreen.y
+		),
+		zoom
+	  );
+
+	  map.setMaxBounds(
+		L.latLngBounds(expandedSW, expandedNE)
+	  );
+	}
+
+
+	function focusPark(key) {
+	  const mobile = window.matchMedia('(max-width: 900px)').matches;
+	  
+	  const view = mobile
+	    ? cameraViews[key]
+		: desktopCameraViews[key];
+
+	  if (!view) return;
+
+	  map.flyTo(view.center, view.zoom, {
+	    duration: 0.6
+	  });
+	}
+
+
+    updateMinZoom();
+    focusInitialView();
+    configureNavigationBounds();
+	
+	// Recalculate the allowable camera area whenever zoom changes.
+	map.on('zoomend', configureNavigationBounds);
+
+
+    // The Locations control has been retired; toolbar tools are Search, Itinerary, Wait Times.
+
+
+    // Accommodate rotation and desktop resizing without resetting a view the
+    // user has deliberately panned or zoomed. Recenter remains available.
+    let resizeFrame;
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        map.invalidateSize({ pan: true, animate: false });
+        configureNavigationBounds();
+        updateMinZoom();
+      });
+    });
+  </script>
+<script src="ios-double-tap.js"></script>
+<script src="places-ui.js"></script>
+<script src="wait-times.js"></script>
+<script src="gps-ui.js"></script>
+<script src="itinerary-ui.js"></script>
+<script src="offline-ui.js"></script>
+<script src="disney-version-ui.js"></script>
+<script src="toolbar-ui.js"></script>
+<script src="disney-activity-tracker.js"></script>
+<script src="disney-admin-overlay.js"></script>
+</body>
+</html>
